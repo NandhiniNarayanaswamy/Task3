@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Game</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .game-container {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-gap: 10px;
+    }
+
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #3498db;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      transform: rotateY(180deg);
+      transition: transform 0.5s, background-color 0.5s;
+    }
+
+    .hidden {
+      background-color: #2c3e50;
+      color: transparent;
+      transform: rotateY(0deg);
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body style="background-color:lavender">
+  <h1 style="color: brown; font-style:normal">Memory Game</h1>
+  <div class="game-container" id="gameBoard"></div>
+  <button onclick="restartGame()" style="border-radius: 10px;">Restart</button>
+
+  <script>
+    const symbols = ['🍎', '🍌', '🍒', '🍇', '🍉', '🥝', '🍍', '🥥'];
+    let cards = [];
+    let firstCard = null, secondCard = null;
+    let lockBoard = false;
+    let matchedPairs = 0;
+    const gameBoard = document.getElementById('gameBoard');
+
+    function shuffleCards() {
+      cards = [...symbols, ...symbols];
+      cards.sort(() => Math.random() - 0.5);
+    }
+
+    function createBoard() {
+      gameBoard.innerHTML = '';
+      shuffleCards();
+      matchedPairs = 0;
+      cards.forEach(symbol => {
+        const card = document.createElement('div');
+        card.classList.add('card', 'hidden');
+        card.dataset.symbol = symbol;
+        card.textContent = symbol;
+        card.addEventListener('click', flipCard);
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function flipCard() {
+      if (lockBoard || this === firstCard) return;
+      this.classList.remove('hidden');
+
+      if (!firstCard) {
+        firstCard = this;
+        return;
+      }
+      secondCard = this;
+      lockBoard = true;
+      checkForMatch();
+    }
+
+    function checkForMatch() {
+      if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+        matchedPairs++;
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        resetTurn();
+        checkWin();
+      } else {
+        setTimeout(() => {
+          firstCard.classList.add('hidden');
+          secondCard.classList.add('hidden');
+          resetTurn();
+        }, 1000);
+      }
+    }
+
+    function resetTurn() {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+    }
+
+    function checkWin() {
+      if (matchedPairs === symbols.length) {
+        setTimeout(() => alert("Congratulations! You found all pairs!"), 500);
+      }
+    }
+
+    function restartGame() {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+      createBoard();
+    }
+
+    createBoard();
+  </script>
+</body>
+
+</html>
